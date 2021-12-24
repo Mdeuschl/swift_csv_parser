@@ -8,9 +8,22 @@
 import SwiftUI
 
 struct ContentView: View {
+    let file = CSVFile(file: sampleData, fieldSeparator: ";")
     var body: some View {
-        Text("Hello, world!")
-            .padding()
+        ScrollView {
+            ForEach(file.lines) { line in
+                Text("___LINE___")
+                ForEach(line.fields, id:\.self) { field in
+                    HStack(alignment: .firstTextBaseline) {
+                        Text("Field:")
+                        Text("'" + field + "'")
+                        Spacer()
+                    }
+                    .padding(.horizontal)
+                }
+            }
+        }
+        .padding(.vertical)
     }
 }
 
