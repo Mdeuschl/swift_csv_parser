@@ -16,7 +16,7 @@ struct ContentView: View {
                 ForEach(line.fields, id:\.self) { field in
                     HStack(alignment: .firstTextBaseline) {
                         Text("Field:")
-                        Text("'" + field + "'")
+                        Text("'" + field.replacingOccurrences(of: "\"\"", with: "\"") + "'")
                         Spacer()
                     }
                     .padding(.horizontal)

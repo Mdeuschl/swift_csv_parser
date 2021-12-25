@@ -8,43 +8,44 @@
 import Foundation
 
 let samples = [
-    "a,b,c\r\n1,2,3",
-    "a,b,c\r\n1,2,3\n4,5,ʤ",
-    "a,b\r1,\"ha \"\"ha\"\" ha\"\r3,4",
+    "a,b,c\r\n1,2,3", // okay
+    "a,b,c\r\n1,2,3\n4,5,ʤ", // okay
+    "a,b\r1,\"ha \"\"ha\"\" ha\"\r3,4", //okay
     """
     a,b,c
     1,2,3
     \"Once upon
     a time\",5,6
     7,8,9
-    """,
+    """, // extra empty field after once upon a time
     """
     first,last,address,city,zip
     John,Doe,120 any st.,"Anytown, WW",08123
-    """,
+    """, // extra empty field aufter Anytown…
     """
     a,b
-    1,\"ha
-    \"\"ha\"\"
-    ha\"
+    1,"ha
+    ""ha""
+    ha"
     3,4
-    """,
+    """, // okay.
     """
     a,b,c
     1,"",""
     2,3,4
-    """,
+    """, //no new line after empty fields
     """
     key,val
     1,"{""type"": ""Point"", ""coordinates"": [102.0, 0.5]}"
-    """,
+    2,"{""type"": ""Point"", ""coordinates"": [99.8, -1.5]}"
+    """, //okay
     """
     a,b,c
     1,"",""
     2,3,4
-    """
+    """ //no new line after empty fields.
 ]
-let sampleData = samples[1]
+let sampleData = samples[8]
 
 //let sampleData = "\"a\";"
 
