@@ -7,7 +7,46 @@
 
 import Foundation
 
-let sampleData = "Date;\"Weight [lb]\"\r\n\"11/12/2021, 10:36:00\";\"163.3\"\r\n\"12/12/2021, 10:24:00\";\"162.8\"\r\n\"13/12/2021, 11:03:57\";\"162.7\"\r\n\"18/12/2021, 08:43:00\";\"162.9\"\r\n\"21/12/2021, 10:23:54\";\"162.2\"\r\n" + "\"Text with \"\"DoubleQuotes\"\" in it;72,7\r\n" + ";72,2\r\n"
+let samples = [
+    "a,b,c\r\n1,2,3",
+    "a,b,c\r\n1,2,3\n4,5,ʤ",
+    "a,b\r1,\"ha \"\"ha\"\" ha\"\r3,4",
+    """
+    a,b,c
+    1,2,3
+    \"Once upon
+    a time\",5,6
+    7,8,9
+    """,
+    """
+    first,last,address,city,zip
+    John,Doe,120 any st.,"Anytown, WW",08123
+    """,
+    """
+    a,b
+    1,\"ha
+    \"\"ha\"\"
+    ha\"
+    3,4
+    """,
+    """
+    a,b,c
+    1,"",""
+    2,3,4
+    """,
+    """
+    key,val
+    1,"{""type"": ""Point"", ""coordinates"": [102.0, 0.5]}"
+    """,
+    """
+    a,b,c
+    1,"",""
+    2,3,4
+    """
+]
+let sampleData = samples[1]
+
+//let sampleData = "\"a\";"
 
 struct LineOfFileds: Hashable, Identifiable {
     var fields: Array<Substring>
@@ -23,9 +62,9 @@ struct CSVFile: Identifiable {
         self.file = file
         self.fieldSeparator = fieldSeparator
         self.lines = []
-        print(self.parse(maxLines: 5))
+        print(self.parse())
     }
-    mutating func parse(maxLines: Int? = 5) -> (lines: Int, fields: Int) {
+    mutating func parse(maxLines: Int? = nil) -> (lines: Int, fields: Int) {
         var isInField = false
         var fieldIsQuoted = false
         var i: String.Index = file.startIndex
@@ -39,86 +78,157 @@ struct CSVFile: Identifiable {
         while i < file.endIndex && (maxLines == nil || linesCount <= maxLines!) && file[rangeStart..<i].count < 100 {
             let thisChar = file[i]
             let iNext = file.index(after: i)
-            switch (isInField: isInField, fieldIsQuoted: fieldIsQuoted, char: thisChar) {
-            case (isInField: false, fieldIsQuoted: false, "\""):
-                fieldIsQuoted = true
-            case (isInField: true, fieldIsQuoted: true, "\""):
-                if iNext < file.endIndex && file[iNext] == "\"" {
-                    //we found a doubled " which should be treated like a single "
-                    i = iNext
-                } else {
-                    //we're at the end of the quoted field.
-                    isInField = false
-                    rangeEnd = i
-                    fieldIsDone = true
-                }
-            case (isInField: false, fieldIsQuoted: true, "\""):
-                if iNext < file.endIndex {
-                    if file[iNext] == fieldSeparator {
-                        //that's a quoted empty field.
-                        rangeStart = i
+            switch (inside: isInField, quoted: fieldIsQuoted) {
+            case (inside: true, quoted: true):
+                if thisChar == "\"" {
+                    if iNext == file.endIndex {
+                        //last quote of the file.
+                        isInField = false
+                        print("interim processed: '\(thisChar)'")
                         rangeEnd = i
-                        fieldIsDone = true
                         i = iNext
-                    } // else just a regular text inside the stupid file.
-                } else { //file is ending after this ???
-
+                        fieldIsDone = true
+                        lineIsDone = true
+                    } else {
+                        switch file[iNext] {
+                        case fieldSeparator:
+                            //regular end of the quoted field and the line.
+                            rangeEnd = i
+                            fieldIsDone = true
+//                            following is wrong…
+//                            print("interim processed: '\(thisChar)'")
+//                            i = iNext
+                        case "\r", "\r\n", "\n":
+                            //regular end of the quoted field.
+                            rangeEnd = i
+                            fieldIsDone = true
+                            lineIsDone = true
+                            print("interim processed: '\(thisChar)'")
+                            i = iNext
+                        case "\"":
+                            //double quote. just move on.
+                            print("interim processed: '\(thisChar)'")
+                            i = iNext
+                        default:
+                            //formatting error.
+                            fieldIsQuoted = false
+                        }
+                    }
+                    //else just move on.
                 }
-            case (isInField: false, fieldIsQuoted: true, _):
-                rangeStart = i
-                isInField = true
-
-            case (isInField: true, fieldIsQuoted: true, _):
-                //just proceed to next. We're looking for " only.
-                ()
-            case (isInField: true, fieldIsQuoted: false, fieldSeparator):
-                rangeEnd = i
-                isInField = false
-                fieldIsDone = true
-            case (isInField: true, fieldIsQuoted: false, "\r"):
-                fallthrough
-            case (isInField: true, fieldIsQuoted: false, "\n"):
-                fallthrough
-            case (isInField: true, fieldIsQuoted: false, "\r\n"):
-                rangeEnd = i
-                isInField = false
-                fieldIsDone = true
-                lineIsDone = true
-            case (isInField: false, fieldIsQuoted: true, "\r"):
-                fallthrough
-            case (isInField: false, fieldIsQuoted: true, "\n"):
-                fallthrough
-            case (isInField: false, fieldIsQuoted: true, "\r\n"):
-                print("hello, breakpoint!")
-                lineIsDone = true
-            case (isInField: false, fieldIsQuoted: _, _):
-                print("nope not here.")
-                rangeStart = i
-                isInField = true
-            default:
-                print("Unhandled case: inField: \(isInField), quoted: \(fieldIsQuoted), char: \(thisChar)")
-            }
-            if !fieldIsDone {
-                if iNext == file.endIndex {
+            case (inside: true, quoted: false):
+                switch thisChar {
+                case fieldSeparator:
+                    fieldIsDone = true
+                    rangeEnd = i
+                case "\r", "\r\n", "\n":
                     fieldIsDone = true
                     lineIsDone = true
+                    rangeEnd = i
+                default:
+                    //just move on.
+                    ()
+                }
+            case (inside: false, quoted: true):
+                switch thisChar {
+                case "\"":
+                    //Is this an empty field or a quoted field with a quote at the start?
+                    if iNext == file.endIndex {
+                        //a single quote at the end of the file?
+                        rangeEnd = i
+                        rangeStart = i
+                        fieldIsDone = true
+                        lineIsDone = true
+                    } else {
+                        let nextChar = file[iNext]
+                        if nextChar == "\"" {
+                            //its a double quote.
+                            rangeStart = i
+                            print("interim processed: '\(file[i])'")
+                            i = iNext
+                            isInField = true
+                        } else {
+                            //not a double quote so thisChar must be the end of the field
+                            //there should be a fieldSeparator next because just empty quoted field.
+                            rangeStart = i
+                            rangeEnd = i
+                            fieldIsDone = true
+                            print("interim processed: '\(file[i])'")
+                            i = iNext
+                        }
+                    }
+                default:
+                    isInField = true
+                    rangeStart = i
+                }
+
+            case (inside: false, quoted: false):
+                switch thisChar {
+                case "\"":
+                    fieldIsQuoted = true
+                case fieldSeparator:
+                    if iNext == file.endIndex {
+                        //;before end of file. Should be an empty field.
+                        rangeStart = i
+                        rangeEnd = i
+                        isInField = true
+                    } else {
+                        rangeStart = i
+                        rangeEnd = i
+                    }
+                    fieldIsDone = true
+                case "\r", "\r\n", "\n":
+                    rangeStart = i
+                    rangeEnd = i
+                    fieldIsDone = true
+                    lineIsDone = true
+                default:
+                    rangeStart = i
+                    isInField = true
+                }
+            }
+            if !fieldIsDone {
+                if file.index(after: i) == file.endIndex {
+                    fieldIsDone = true
+                    lineIsDone = true
+                    if fieldIsQuoted {
+                        rangeEnd = i
+                    } else {
+                        rangeEnd = file.endIndex
+                    }
                 }
             }
             if fieldIsDone {
                 fieldIsDone = false
-                let subString = file[rangeStart..<rangeEnd]
-                fieldsInLine.append(subString)
-                print("Field done: ", subString)
+                if rangeStart <= rangeEnd {
+                    let subString = file[rangeStart..<rangeEnd]
+                    fieldsInLine.append(subString)
+                    print("Field done: '\(subString)'")
+                } else {
+                    fatalError("Invalid range in fieldIsDone \(rangeStart)..<\(rangeEnd)")
+                }
                 isInField = false
                 fieldIsQuoted = false
                 fieldsCount += 1
             }
+            if !lineIsDone {
+                if file.index(after: i) == file.endIndex {
+//                    fieldIsDone = true
+                    lineIsDone = true
+                }
+            }
             if lineIsDone {
+                print("Line is done")
                 lines.append(LineOfFileds(fields: fieldsInLine))
                 fieldsInLine = []
                 linesCount += 1
+                lineIsDone = false
             }
-            i = file.index(after: i)
+            if i < file.endIndex {
+                print("last processed: '\(file[i])'")
+                i = file.index(after: i)
+            }
+
         }
         return (linesCount, fieldsCount)
     }

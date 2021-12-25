@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    let file = CSVFile(file: sampleData, fieldSeparator: ";")
+    let file = CSVFile(file: sampleData, fieldSeparator: ",")
     var body: some View {
         ScrollView {
             ForEach(file.lines) { line in
