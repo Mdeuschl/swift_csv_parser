@@ -8,44 +8,39 @@
 import Foundation
 
 let samples = [
-    "a,b,c\r\n1,2,3", // okay
-    "a,b,c\r\n1,2,3\n4,5,ʤ", // okay
-    "a,b\r1,\"ha \"\"ha\"\" ha\"\r3,4", //okay
+    "a,b,c\r\n1,2,3", //0 okay
+    "a,b,c\r\n1,2,3\n4,5,ʤ", //1 okay
+    "a,b\r1,\"ha \"\"ha\"\" ha\"\r3,4", //2 okay
     """
     a,b,c
     1,2,3
     \"Once upon
     a time\",5,6
     7,8,9
-    """, // extra empty field after once upon a time
+    """, //3 extra empty field after once upon a time
     """
     first,last,address,city,zip
     John,Doe,120 any st.,"Anytown, WW",08123
-    """, // extra empty field aufter Anytown…
+    """, //4 extra empty field aufter Anytown…
     """
     a,b
     1,"ha
     ""ha""
     ha"
     3,4
-    """, // okay.
+    """, //5 okay.
     """
     a,b,c
     1,"",""
     2,3,4
-    """, //no new line after empty fields
+    """, //6 no new line after empty fields
     """
     key,val
     1,"{""type"": ""Point"", ""coordinates"": [102.0, 0.5]}"
     2,"{""type"": ""Point"", ""coordinates"": [99.8, -1.5]}"
-    """, //okay
-    """
-    a,b,c
-    1,"",""
-    2,3,4
-    """ //no new line after empty fields.
+    """ //7 okay
 ]
-let sampleData = samples[8]
+let sampleData = samples[7]
 
 //let sampleData = "\"a\";"
 
@@ -166,7 +161,35 @@ struct CSVFile: Identifiable {
             case (inside: false, quoted: false):
                 switch thisChar {
                 case "\"":
-                    fieldIsQuoted = true
+                    if iNext < file.endIndex {
+                        if file[iNext] == "\"" {
+                            let iNext2 = file.index(after: iNext)
+                            if iNext2 < file.endIndex {
+                                if file[iNext2] == "\"" {
+                                    //Double Quote inside a quoted field.
+                                    fieldIsQuoted = true
+                                } else {
+                                    //empty quoted field
+                                    i = iNext
+                                    rangeStart = iNext
+                                    rangeEnd = iNext
+//                                    fieldIsDone = false
+                                }
+                            } else {
+                                //empty quoted field at EOF.
+                                rangeStart = iNext
+                                rangeEnd = iNext
+//                                fieldIsDone = true
+                            }
+                        } else {
+                            fieldIsQuoted = true
+                        }
+                    } else {
+                        //single quote at EOF?
+                        rangeStart = i
+                        rangeEnd = iNext
+                        fieldIsDone = true
+                    }
                 case fieldSeparator:
                     if iNext == file.endIndex {
                         //;before end of file. Should be an empty field.
