@@ -8,22 +8,37 @@
 import SwiftUI
 
 struct ContentView: View {
-    let file = CSVFile(file: sampleData, fieldSeparator: ",")
+    @State var index = 8
+    var file: CSVFile {
+        if (samples.startIndex..<samples.endIndex).contains(index) {
+            return CSVFile(file: samples[index], fieldSeparator: ",")
+        } else {
+            return CSVFile(file: "Index out of bounds.", fieldSeparator: ",")
+        }
+    }
     var body: some View {
-        ScrollView {
-            ForEach(file.lines) { line in
-                Text("___LINE___")
-                ForEach(line.fields, id:\.self) { field in
+        VStack(alignment: .leading) {
+            Text(samples[index])
+                .border(.green, width: 1.0)
+            ScrollView {
+                ForEach(file.lines) { line in
+                    Text("___LINE___ (\(line.fields.count))")
                     HStack(alignment: .firstTextBaseline) {
-                        Text("Field:")
-                        Text("'" + field.replacingOccurrences(of: "\"\"", with: "\"") + "'")
-                        Spacer()
+                    ForEach(line.fields, id:\.self) { field in
+                            Text(field.replacingOccurrences(of: "\"\"", with: "\""))
+                                .padding(1.0)
+                                .border(Color.red, width: 1.0)
+                            Spacer()
+                        }
                     }
                     .padding(.horizontal)
                 }
             }
+            .padding(.vertical)
+            Stepper("Current index: \(index)", value: $index)
+                .padding(.vertical)
         }
-        .padding(.vertical)
+        .padding(.horizontal)
     }
 }
 
