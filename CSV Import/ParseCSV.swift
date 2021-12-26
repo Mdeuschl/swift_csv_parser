@@ -50,7 +50,7 @@ struct CSVFile {
         while i < file.endIndex && (maxLines == nil || linesCount <= maxLines!) && file[rangeStart..<i].count < 100 {
             let thisChar = file[i]
             let iNext = file.index(after: i)
-#if DEUBG
+#if DEBUG
             print("vvv\rNext thisChar='\(thisChar)'. \(isInField ? "InField" : "OutOfField"). \(fieldIsQuoted ? "Quoted." : "Not quoted.")")
 #endif
             switch (inside: isInField, quoted: fieldIsQuoted) {
@@ -200,7 +200,7 @@ struct CSVFile {
                 if rangeStart <= rangeEnd {
                     let subString = file[rangeStart..<rangeEnd]
                     fieldsInLine.append(subString)
-#if DEUBG
+#if DEBUG
                     print("Field done: '\(subString)'")
 #endif
                 } else {
@@ -216,7 +216,7 @@ struct CSVFile {
                 }
             }
             if lineIsDone {
-#if DEUBG
+#if DEBUG
                 print("Line is done")
 #endif
                 lines.append(LineOfFields(fields: fieldsInLine))
