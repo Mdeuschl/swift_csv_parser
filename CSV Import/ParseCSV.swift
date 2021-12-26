@@ -2,7 +2,9 @@
 //  ParseCSV.swift
 //
 //  Created by Matthias Deuschl on 23.12.21.
-//
+//  GitHub: https://github.com/Mdeuschl/swift_csv_parser
+//  Version 0.9
+//  2021-12-26
 
 import Foundation
 
@@ -47,6 +49,7 @@ struct CSVFile {
         var fieldsCount = 0
         var fieldsInLine: Array<Substring> = []
         var fileHasErrors = false
+        self.lines = []
         while i < file.endIndex && (maxLines == nil || linesCount <= maxLines!) && file[rangeStart..<i].count < 100 {
             let thisChar = file[i]
             let iNext = file.index(after: i)
