@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C90F1CA42778F2450033A854 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = C90F1CA22778F2450033A854 /* LICENSE */; };
+		C90F1CA52778F2450033A854 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = C90F1CA32778F2450033A854 /* README.md */; };
 		C967F2C42774DA45003620FA /* CSV_ImportApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C967F2C32774DA45003620FA /* CSV_ImportApp.swift */; };
 		C967F2C62774DA45003620FA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C967F2C52774DA45003620FA /* ContentView.swift */; };
 		C967F2C82774DA46003620FA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C967F2C72774DA46003620FA /* Assets.xcassets */; };
@@ -15,6 +17,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		C90F1CA22778F2450033A854 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		C90F1CA32778F2450033A854 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		C967F2C02774DA45003620FA /* CSV Import.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "CSV Import.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C967F2C32774DA45003620FA /* CSV_ImportApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSV_ImportApp.swift; sourceTree = "<group>"; };
 		C967F2C52774DA45003620FA /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -53,6 +57,8 @@
 		C967F2C22774DA45003620FA /* CSV Import */ = {
 			isa = PBXGroup;
 			children = (
+				C90F1CA22778F2450033A854 /* LICENSE */,
+				C90F1CA32778F2450033A854 /* README.md */,
 				C967F2C32774DA45003620FA /* CSV_ImportApp.swift */,
 				C967F2C52774DA45003620FA /* ContentView.swift */,
 				C967F2D22774DA7B003620FA /* ParseCSV.swift */,
@@ -128,7 +134,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C90F1CA42778F2450033A854 /* LICENSE in Resources */,
 				C967F2CB2774DA46003620FA /* Preview Assets.xcassets in Resources */,
+				C90F1CA52778F2450033A854 /* README.md in Resources */,
 				C967F2C82774DA46003620FA /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
