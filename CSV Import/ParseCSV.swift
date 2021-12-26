@@ -26,11 +26,15 @@ struct CSVFile {
     mutating func parse(_ maxLines: Int? = nil) {
         var i: String.Index = file.startIndex {
             willSet {
+#if DEBUG
                 if (file.startIndex..<file.endIndex).contains(newValue) {
                     print("Moving on. From \(i): '\(file[i])' to \(newValue): '\(file[newValue])'")
                 } else {
                     print("Reached EOF moving on from \(i): '\(file[i])'.")
                 }
+#else
+            ()
+#endif
             }
         }
         var isInField = false
@@ -46,7 +50,9 @@ struct CSVFile {
         while i < file.endIndex && (maxLines == nil || linesCount <= maxLines!) && file[rangeStart..<i].count < 100 {
             let thisChar = file[i]
             let iNext = file.index(after: i)
+#if DEUBG
             print("vvv\rNext thisChar='\(thisChar)'. \(isInField ? "InField" : "OutOfField"). \(fieldIsQuoted ? "Quoted." : "Not quoted.")")
+#endif
             switch (inside: isInField, quoted: fieldIsQuoted) {
             case (inside: true, quoted: true):
                 if thisChar == "\"" {
@@ -194,7 +200,9 @@ struct CSVFile {
                 if rangeStart <= rangeEnd {
                     let subString = file[rangeStart..<rangeEnd]
                     fieldsInLine.append(subString)
+#if DEUBG
                     print("Field done: '\(subString)'")
+#endif
                 } else {
                     fatalError("Invalid range in fieldIsDone \(rangeStart)..<\(rangeEnd)")
                 }
@@ -208,14 +216,18 @@ struct CSVFile {
                 }
             }
             if lineIsDone {
+#if DEUBG
                 print("Line is done")
+#endif
                 lines.append(LineOfFields(fields: fieldsInLine))
                 fieldsInLine = []
                 linesCount += 1
                 lineIsDone = false
             }
             if i < file.endIndex {
+#if DEUBG
                 print("Finished parsing up to \(i): '\(file[i])'\r^^^")
+#endif
                 i = file.index(after: i)
             }
 
