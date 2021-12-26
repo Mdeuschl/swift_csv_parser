@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State var index = 8
+    @AppStorage("Last index used") var index = 0
     var file: CSVFile {
         if (samples.startIndex..<samples.endIndex).contains(index) {
             return CSVFile(file: samples[index], fieldSeparator: ",")
