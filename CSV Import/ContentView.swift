@@ -9,32 +9,41 @@ import SwiftUI
 
 struct ContentView: View {
     @AppStorage("Last index used") var index = 0
-    var file: CSVFile {
+    var rawFile: String {
         if (samples.startIndex..<samples.endIndex).contains(index) {
-            return CSVFile(file: samples[index], fieldSeparator: ",")
+            return samples[index]
         } else {
-            return CSVFile(file: "Index out of bounds.", fieldSeparator: ",")
+            return "'index' (\(index)),out,of,BOUNDS (\(samples.startIndex)..<\(samples.endIndex))!"
         }
+    }
+    var file: CSVFile {
+        CSVFile(file: rawFile, fieldSeparator: ",")
     }
     var body: some View {
         VStack(alignment: .leading) {
-            Text(samples[index])
+            Text("Raw file")
+                .font(.headline)
+            Text(rawFile)
                 .border(.green, width: 1.0)
             ScrollView {
-                ForEach(file.lines) { line in
-                    Text("___LINE___ (\(line.fields.count))")
-                    HStack(alignment: .firstTextBaseline) {
-                    ForEach(line.fields, id:\.self) { field in
-                            Text(field.replacingOccurrences(of: "\"\"", with: "\""))
-                                .padding(1.0)
-                                .border(Color.red, width: 1.0)
-                            Spacer()
+                VStack(alignment: .leading) {
+                    Text("Parsed fields")
+                        .font(.headline)
+                    ForEach(file.lines) { line in
+                        Text("___LINE___ (\(line.fields.count))")
+                        HStack(alignment: .firstTextBaseline) {
+                        ForEach(line.fields, id:\.self) { field in
+                                Text(field.replacingOccurrences(of: "\"\"", with: "\""))
+                                    .padding(1.0)
+                                    .border(Color.red, width: 1.0)
+                                Spacer()
+                            }
                         }
+                        .padding(.horizontal)
                     }
-                    .padding(.horizontal)
                 }
+                .padding(.vertical)
             }
-            .padding(.vertical)
             Stepper("Current index: \(index)", value: $index)
                 .padding(.vertical)
         }
