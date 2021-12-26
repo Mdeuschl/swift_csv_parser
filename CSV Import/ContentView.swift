@@ -25,11 +25,9 @@ First,"2nd",third
 First,"2 with ""Double"" quote.","3."
 "Quoted","Fields","with ""double"" Quotes"
 "Quoted
-Fields",
-"with
+Fields","with
 new
-lines, and comma",
-"in it"
+lines, and comma","in it"
 """,
 "Empty file follows",
 """
@@ -61,10 +59,10 @@ Third line w/ trailing quote to correct error"
 "4th line starts with open ended quote before EOF.
 """,
 """
-Format Errors:,"More quote errors"
+Format Errors:,"More quote errors",
 1st "line",with "single" double quotes,inside unquoted field
-"2nd line with" Text behind closing quote,and another unquoted field
-\"\"3rd starting with double quote in unquoted field,"plus regular quoted field"
+"2nd line with" Text behind closing quote,and two,other unquoted fields
+\"\"3rd starting with double quote in unquoted field,"plus regular quoted field",
 "\"\"4th: Triple Quote @start,closed with another triple.\"\"\"
 """,
 """
@@ -128,7 +126,7 @@ struct ContentView: View {
         }
     }
     var csvFile: CSVFile {
-        CSVFile(file: rawFile, fieldSeparator: ",")
+        CSVFile(file: rawFile, fieldSeparator: ",", tryMaxLines: 5)
     }
     var body: some View {
         let file = csvFile
