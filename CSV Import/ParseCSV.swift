@@ -18,14 +18,27 @@ struct CSVFile: Identifiable {
     let file: String
     var lines: Array<LineOfFields>
     var fieldSeparator: Character // Usually , or ; -- to separate fields from each other
+    var errorFree: Bool = true
     init(file: String, fieldSeparator: Character) {
         self.file = file
         self.fieldSeparator = fieldSeparator
         self.lines = []
-        print(self.parse())
+        let reportedlines: Int
+        (_, reportedlines , self.errorFree) = self.parse()
+        if reportedlines != self.lines.count {
+            print("DIDN'T GET \(reportedlines) EXACT NUMBER OF RESULTS \(self.lines.count) AFTER PARSING!")
+        }
     }
-    mutating func parse(maxLines: Int? = nil) -> (lines: Int, fields: Int) {
-        var i: String.Index = file.startIndex
+    mutating func parse(maxLines: Int? = nil) -> (lines: Int, fields: Int, errorFree: Bool) {
+        var i: String.Index = file.startIndex {
+            willSet {
+                if (file.startIndex..<file.endIndex).contains(newValue) {
+                    print("Moving on. From \(i): '\(file[i])' to \(newValue): '\(file[newValue])'")
+                } else {
+                    print("Reached EOF moving on from \(i): '\(file[i])'.")
+                }
+            }
+        }
         var isInField = false
         var fieldIsQuoted = false
         var fieldIsDone = false
@@ -35,16 +48,17 @@ struct CSVFile: Identifiable {
         var linesCount = 0
         var fieldsCount = 0
         var fieldsInLine: Array<Substring> = []
+        var fileHasErrors = false
         while i < file.endIndex && (maxLines == nil || linesCount <= maxLines!) && file[rangeStart..<i].count < 100 {
             let thisChar = file[i]
             let iNext = file.index(after: i)
+            print("vvv\rNext thisChar='\(thisChar)'. \(isInField ? "InField" : "OutOfField"). \(fieldIsQuoted ? "Quoted." : "Not quoted.")")
             switch (inside: isInField, quoted: fieldIsQuoted) {
             case (inside: true, quoted: true):
                 if thisChar == "\"" {
                     if iNext == file.endIndex {
                         //last quote of the file.
                         isInField = false
-                        print("interim processed: '\(thisChar)'")
                         rangeEnd = i
                         i = iNext
                         fieldIsDone = true
@@ -55,23 +69,20 @@ struct CSVFile: Identifiable {
                             //regular end of the quoted field and the line.
                             rangeEnd = i
                             fieldIsDone = true
-//                            following is wrong…
-//                            print("interim processed: '\(thisChar)'")
-//                            i = iNext
+                            i = iNext
                         case "\r", "\r\n", "\n":
                             //regular end of the quoted field.
                             rangeEnd = i
                             fieldIsDone = true
                             lineIsDone = true
-                            print("interim processed: '\(thisChar)'")
                             i = iNext
                         case "\"":
                             //double quote. just move on.
-                            print("interim processed: '\(thisChar)'")
                             i = iNext
                         default:
                             //formatting error.
                             fieldIsQuoted = false
+                            fileHasErrors = true
                         }
                     }
                     //else just move on.
@@ -99,12 +110,12 @@ struct CSVFile: Identifiable {
                         rangeStart = i
                         fieldIsDone = true
                         lineIsDone = true
+                        fileHasErrors = true
                     } else {
                         let nextChar = file[iNext]
                         if nextChar == "\"" {
                             //its a double quote.
                             rangeStart = i
-                            print("interim processed: '\(file[i])'")
                             i = iNext
                             isInField = true
                         } else {
@@ -113,7 +124,6 @@ struct CSVFile: Identifiable {
                             rangeStart = i
                             rangeEnd = i
                             fieldIsDone = true
-                            print("interim processed: '\(file[i])'")
                             i = iNext
                         }
                     }
@@ -153,6 +163,7 @@ struct CSVFile: Identifiable {
                         rangeStart = i
                         rangeEnd = iNext
                         fieldIsDone = true
+                        fileHasErrors = true
                     }
                 case fieldSeparator:
                     if iNext == file.endIndex {
@@ -213,12 +224,12 @@ struct CSVFile: Identifiable {
                 lineIsDone = false
             }
             if i < file.endIndex {
-                print("last processed: '\(file[i])'")
+                print("Finished parsing up to \(i): '\(file[i])'\r^^^")
                 i = file.index(after: i)
             }
 
         }
-        return (linesCount, fieldsCount)
+        return (linesCount, fieldsCount, !fileHasErrors)
     }
 }
 
