@@ -8,6 +8,8 @@ The parsing is done adhering to https://github.com/parsecsv/csv-spec. In some ca
 A parsing error is reported when the number of fields is not identical for all lines or in some unrecoverable cases of improperly quoted fields. The parsing is not stopped by an error.
 
 ## Usage
+The logic of the parser is in /CSV Import/ParseCSV.swift. The rest of this repository is for quickly testing in an Xcode project.
+
 1. Read file and convert into String.
 2. Initialize a Struct copying the file String:
 ```
