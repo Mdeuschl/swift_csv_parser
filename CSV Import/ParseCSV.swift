@@ -8,7 +8,7 @@
 import Foundation
 
 
-struct LineOfFileds: Hashable, Identifiable {
+struct LineOfFields: Hashable, Identifiable {
     var fields: Array<Substring>
     let id = UUID()
 }
@@ -16,7 +16,7 @@ struct LineOfFileds: Hashable, Identifiable {
 struct CSVFile: Identifiable {
     let id = UUID()
     let file: String
-    var lines: Array<LineOfFileds>
+    var lines: Array<LineOfFields>
     var fieldSeparator: Character // Usually , or ; -- to separate fields from each other
     init(file: String, fieldSeparator: Character) {
         self.file = file
@@ -207,7 +207,7 @@ struct CSVFile: Identifiable {
             }
             if lineIsDone {
                 print("Line is done")
-                lines.append(LineOfFileds(fields: fieldsInLine))
+                lines.append(LineOfFields(fields: fieldsInLine))
                 fieldsInLine = []
                 linesCount += 1
                 lineIsDone = false
