@@ -25,15 +25,15 @@ struct CSVFile: Identifiable {
         print(self.parse())
     }
     mutating func parse(maxLines: Int? = nil) -> (lines: Int, fields: Int) {
+        var i: String.Index = file.startIndex
         var isInField = false
         var fieldIsQuoted = false
-        var i: String.Index = file.startIndex
+        var fieldIsDone = false
+        var lineIsDone = false
         var rangeStart: String.Index  = file.startIndex
         var rangeEnd: String.Index  = file.startIndex
         var linesCount = 0
         var fieldsCount = 0
-        var fieldIsDone = false
-        var lineIsDone = false
         var fieldsInLine: Array<Substring> = []
         while i < file.endIndex && (maxLines == nil || linesCount <= maxLines!) && file[rangeStart..<i].count < 100 {
             let thisChar = file[i]
