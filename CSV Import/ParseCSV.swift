@@ -1,6 +1,5 @@
 //
 //  ParseCSV.swift
-//  AufdieWaage
 //
 //  Created by Matthias Deuschl on 23.12.21.
 //
@@ -13,23 +12,18 @@ struct LineOfFields: Hashable, Identifiable {
     let id = UUID()
 }
 
-struct CSVFile: Identifiable {
-    let id = UUID()
+struct CSVFile {
     let file: String
     var lines: Array<LineOfFields>
     var fieldSeparator: Character // Usually , or ; -- to separate fields from each other
     var errorFree: Bool = true
-    init(file: String, fieldSeparator: Character) {
+    init(file: String, fieldSeparator: Character = ",", tryMaxLines maxLines: Int? = nil) {
         self.file = file
         self.fieldSeparator = fieldSeparator
         self.lines = []
-        let reportedlines: Int
-        (_, reportedlines , self.errorFree) = self.parse()
-        if reportedlines != self.lines.count {
-            print("DIDN'T GET \(reportedlines) EXACT NUMBER OF RESULTS \(self.lines.count) AFTER PARSING!")
-        }
+        self.parse(maxLines)
     }
-    mutating func parse(maxLines: Int? = nil) -> (lines: Int, fields: Int, errorFree: Bool) {
+    mutating func parse(_ maxLines: Int? = nil) {
         var i: String.Index = file.startIndex {
             willSet {
                 if (file.startIndex..<file.endIndex).contains(newValue) {
@@ -147,13 +141,11 @@ struct CSVFile: Identifiable {
                                     i = iNext
                                     rangeStart = iNext
                                     rangeEnd = iNext
-//                                    fieldIsDone = false
                                 }
                             } else {
-                                //empty quoted field at EOF.
+                                //empty quoted field before EOF.
                                 rangeStart = iNext
                                 rangeEnd = iNext
-//                                fieldIsDone = true
                             }
                         } else {
                             fieldIsQuoted = true
@@ -212,7 +204,6 @@ struct CSVFile: Identifiable {
             }
             if !lineIsDone {
                 if file.index(after: i) == file.endIndex {
-//                    fieldIsDone = true
                     lineIsDone = true
                 }
             }
@@ -229,7 +220,29 @@ struct CSVFile: Identifiable {
             }
 
         }
-        return (linesCount, fieldsCount, !fileHasErrors)
+        if !fileHasErrors {
+            if self.lines.count > 0 {
+                let maxLines = self.lines.reduce(self.lines.first!.fields.count) {
+                    let thisLineCount = $1.fields.count
+                    if thisLineCount > $0 {
+                        return thisLineCount
+                    } else {
+                        return $0
+                    }
+                }
+                let minLines = self.lines.reduce(self.lines.first!.fields.count) {
+                    let thisLineCount = $1.fields.count
+                    if thisLineCount < $0 {
+                        return thisLineCount
+                    } else {
+                        return $0
+                    }
+                }
+                if maxLines != minLines { fileHasErrors = true }
+            }
+        }
+        self.errorFree = !fileHasErrors
+        //bye-bye.
     }
 }
 
