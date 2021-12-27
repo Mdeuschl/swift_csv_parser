@@ -50,7 +50,7 @@ struct CSVFile {
         var fieldsInLine: Array<Substring> = []
         var fileHasErrors = false
         self.lines = []
-        while i < file.endIndex && (maxLines == nil || linesCount <= maxLines!) && file[rangeStart..<i].count < 100 {
+        while i < file.endIndex && (maxLines == nil || linesCount < maxLines!) && file[rangeStart..<i].count < 100 {
             let thisChar = file[i]
             let iNext = file.index(after: i)
 #if DEBUG
