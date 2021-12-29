@@ -182,6 +182,10 @@ struct CSVFile {
                     rangeEnd = i
                     fieldIsDone = true
                     lineIsDone = true
+                case Character(UnicodeScalar(UInt16(65279))!):
+                    //special treatment for Excel, thank you very much.
+                    //It's a zero width space, so we'll just move on, nothing to see here anyway.
+                    ()
                 default:
                     rangeStart = i
                     isInField = true
